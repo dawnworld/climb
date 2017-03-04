@@ -1,12 +1,13 @@
-#include "common/common.h"
+#include "utils/util.h"
+#include "utils/array.h"
 #include "dp/dp.h"
 #include <string.h>
-
-#define MAX(A, B) ((A) > (B) ? (A) : (B))
+#include <stdio.h>
 
 typedef struct gem {
     uint16  volume;
     uint16  value;
+    uint8   put;
 } Gem;
 
 typedef struct knapsack_ctx {
@@ -14,6 +15,7 @@ typedef struct knapsack_ctx {
     uint16  gem_num;    
     uint16  gem_added;
     Gem*    gem_array;
+    uint32**  results;
 } KsCtx;
 
 KsCtx* ks_init(uint32 cap, uint32 num)
@@ -59,9 +61,9 @@ uint32 ks_calc_max(KsCtx *ctx)
     Gem* gem = NULL;
     uint32 result = 0;
 
-    w = (uint32 **) MALLOC(sizeof(uint32) * (ctx->gem_added + 1));
-    for(i = 0; i <= ctx->gem_added; i++)
-        w[i] = (uint32 *) MALLOC(sizeof(uint32) * (ctx->capacity + 1));
+    w = (uint32 **)alloc_2d_array(ctx->gem_added + 1,
+                                  ctx->capacity + 1,
+                                  sizeof(uint32));
 
     for(i = 0; i <= ctx->gem_added; i++)
         w[i][0] = 0;
@@ -87,9 +89,45 @@ uint32 ks_calc_max(KsCtx *ctx)
     }
 
     result = w[ctx->gem_added][ctx->capacity];
-    FREE(w);
+
+    ctx->results = w;
 
     return result;
+}
+
+void ks_show_gems(char* buf, uint32 buf_len, KsCtx *ctx)
+{
+    int i = 0, j = 0;
+    uint32** w  = NULL;
+    Gem *gem    = NULL;
+    uint32  len = buf_len;
+
+    if(NULL == buf || 0 == buf_len || NULL == ctx)
+        return;
+
+    if(NULL == ctx->results || NULL == ctx->gem_array)
+        return;
+
+    w = ctx->results;
+    for(i = ctx->gem_added, j = ctx->capacity; i > 0; i--)
+    {
+        if(w[i][j] > w[i - 1][j])
+        {
+            gem = ctx->gem_array + i;
+            gem->put = TRUE;
+            j -= gem->volume;
+        }
+    }
+
+    for(i = 1; i <= ctx->gem_added; i++)
+    {
+        gem = ctx->gem_array + i;
+        if(TRUE == gem->put)
+        {
+            len = strnlen(buf, buf_len);
+            buf += snprintf(buf, buf_len - len, "(%u,%u) ", gem->volume, gem->value);
+        }
+    }
 }
 
 void ks_close(KsCtx *ctx)
@@ -99,6 +137,9 @@ void ks_close(KsCtx *ctx)
 
     if(NULL != ctx->gem_array)
         FREE(ctx->gem_array);
+
+    if(NULL != ctx->results)
+        free_2d_array((void **)ctx->results);
 
     FREE(ctx);
 }

@@ -11,13 +11,16 @@ GTEST_LIB = $(OUT)/googletest/libgtest.a
 
 CFLAGS += -I$(GTEST_DIR)/include
 
+UTIL_OBJS = utils/array.o
+OBJS := $(UTIL_OBJS)
+
 # ------------------- Queue --------------------
-#OBJS = queue/queue.o 
+#OBJS += queue/queue.o 
 #TEST_SRC = tests/queue/test_queue.cc
 #BIN = test_queue
 
 # ------------------- Knapsack -----------------
-OBJS = dp/knapsack.o 
+OBJS += dp/knapsack.o 
 TEST_SRC = tests/dp/test_knapsack.cc
 BIN = test_ks
 

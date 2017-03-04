@@ -1,7 +1,7 @@
 #ifndef __DP_H__
 #define __DP_H__
 
-#include "common/common.h"
+#include "utils/util.h"
 
 typedef struct knapsack_ctx KsCtx;
 

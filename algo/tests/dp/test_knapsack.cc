@@ -15,6 +15,10 @@ TEST(Knapsack, OneGem) {
     EXPECT_EQ(1, ks_add_gem(1, 10, ks));
     EXPECT_EQ(10, ks_calc_max(ks));
 
+    char buf[1024] = {0};
+    ks_show_gems(buf, sizeof(buf), ks);
+    EXPECT_STREQ("(1,10) ", buf);
+
     ks_close(ks);
 }
 
@@ -26,6 +30,10 @@ TEST(Knapsack, ThreeGems) {
     EXPECT_EQ(2, ks_add_gem(2, 1, ks));
     EXPECT_EQ(3, ks_add_gem(2, 5, ks));
     EXPECT_EQ(15, ks_calc_max(ks));
+
+    char buf[1024] = {0};
+    ks_show_gems(buf, sizeof(buf), ks);
+    EXPECT_STREQ("(1,10) (2,5) ", buf);
 
     ks_close(ks);
 }

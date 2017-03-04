@@ -3,4 +3,6 @@ out
 *.o
 *.a
 *.dSYM
+.ycm_extra_conf.py
+cscope*
 test_queue
