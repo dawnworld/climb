@@ -1,8 +1,16 @@
 #include "utils/util.h"
-#include "utils/array.h"
 #include "dp/dp.h"
 #include <string.h>
 #include <stdio.h>
+
+#include "gdsl/gdsl_2darray.h"
+
+#define _2D_ARRAY_ALLOC(N, R, C) gdsl_2darray_alloc(N, R, C, NULL, NULL)
+#define _2D_ARRAY_SET(R, C, D) gdsl_2darray_set_content(w, R, C, (void *)D)
+#define _2D_ARRAY_GET(R, C) (uint32)gdsl_2darray_get_content(w, R, C)
+#define _2D_ARRAY_FREE(A) gdsl_2darray_free((gdsl_2darray_t)A)
+
+typedef gdsl_2darray_t _2D_ARRAY;
 
 typedef struct gem {
     uint16  volume;
@@ -15,7 +23,7 @@ typedef struct knapsack_ctx {
     uint16  gem_num;    
     uint16  gem_added;
     Gem*    gem_array;
-    uint32**  results;
+    void*   results;
 } KsCtx;
 
 KsCtx* ks_init(uint32 cap, uint32 num)
@@ -56,20 +64,18 @@ uint32 ks_calc_max(KsCtx *ctx)
     if(NULL == ctx || 0 == ctx->gem_added || 0 == ctx->capacity)
         return 0;
 
-    uint32** w = NULL;
     uint16 i = 0, j = 0;
     Gem* gem = NULL;
     uint32 result = 0;
+    _2D_ARRAY w;
 
-    w = (uint32 **)alloc_2d_array(ctx->gem_added + 1,
-                                  ctx->capacity + 1,
-                                  sizeof(uint32));
+    w = _2D_ARRAY_ALLOC("gems", ctx->gem_added + 1, ctx->capacity + 1);
 
     for(i = 0; i <= ctx->gem_added; i++)
-        w[i][0] = 0;
+        _2D_ARRAY_SET(i, 0, 0);
     
     for(j = 0; j <= ctx->capacity; j++)
-        w[0][j] = 0;
+        _2D_ARRAY_SET(0, j, 0);
 
     for(i = 1; i <= ctx->gem_added; i++)
     {
@@ -79,18 +85,22 @@ uint32 ks_calc_max(KsCtx *ctx)
         {
             if(gem->volume > j)
             {
-                w[i][j] = w[i - 1][j];
+                _2D_ARRAY_SET(i, j, _2D_ARRAY_GET(i - 1, j));
+                // w[i][j] = w[i - 1][j];
             }
             else
             {
-                w[i][j] = MAX(w[i - 1][j], w[i - 1][j - gem->volume] + gem->value);
+                _2D_ARRAY_SET(i, j,
+                        MAX(_2D_ARRAY_GET(i - 1, j),
+                            _2D_ARRAY_GET(i - 1, j - gem->volume) + gem->value)
+                        );
             }
         }
     }
 
-    result = w[ctx->gem_added][ctx->capacity];
+    result = _2D_ARRAY_GET(ctx->gem_added, ctx->capacity);
 
-    ctx->results = w;
+    ctx->results = (void *)w;
 
     return result;
 }
@@ -98,7 +108,7 @@ uint32 ks_calc_max(KsCtx *ctx)
 void ks_show_gems(char* buf, uint32 buf_len, KsCtx *ctx)
 {
     int i = 0, j = 0;
-    uint32** w  = NULL;
+    _2D_ARRAY w  = NULL;
     Gem *gem    = NULL;
     uint32  len = buf_len;
 
@@ -111,7 +121,7 @@ void ks_show_gems(char* buf, uint32 buf_len, KsCtx *ctx)
     w = ctx->results;
     for(i = ctx->gem_added, j = ctx->capacity; i > 0; i--)
     {
-        if(w[i][j] > w[i - 1][j])
+        if(_2D_ARRAY_GET(i, j) > _2D_ARRAY_GET(i - 1, j))
         {
             gem = ctx->gem_array + i;
             gem->put = TRUE;
@@ -139,7 +149,7 @@ void ks_close(KsCtx *ctx)
         FREE(ctx->gem_array);
 
     if(NULL != ctx->results)
-        free_2d_array((void **)ctx->results);
+        _2D_ARRAY_FREE(ctx->results);
 
     FREE(ctx);
 }

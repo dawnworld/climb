@@ -11,6 +11,7 @@ extern "C" {
 
 #define MALLOC 		malloc
 #define FREE   		free
+#define REALLOC     realloc
 
 #define TRUE        (1)
 #define FALSE       (0)
@@ -21,6 +22,7 @@ extern "C" {
 typedef unsigned int    uint32;
 typedef unsigned short  uint16;
 typedef unsigned char   uint8;
+typedef unsigned char   bool_t;
 
 #ifdef __cplusplus
 }
