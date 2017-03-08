@@ -31,7 +31,8 @@ KS_TEST_SRC = tests/dp/test_knapsack.cc
 KS_BIN = $(BUILDDIR)/test_ks
 
 # ------------------- Graph --------------------
-GRAPH_SRCS := graph/graph.c graph/graph_search.c
+GRAPH_SRC_DIR = graph
+GRAPH_SRCS := $(shell find $(GRAPH_SRC_DIR) -name '*.c')
 GRAPH_TEST_SRC = tests/graph/test_graph.cc
 GRAPH_BIN = $(BUILDDIR)/test_graph
 

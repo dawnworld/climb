@@ -56,6 +56,10 @@ struct search_info *search_info_create(Graph g);
 /* free search_info data---does NOT free graph pointer */
 void search_info_destroy(struct search_info *);
 
+/* reset all the info, ready for next */
+void search_info_reset(struct search_info *);
+
+
 /* perform depth-first search starting at root, updating results */
 void dfs(struct search_info *results, uint32 root);
 

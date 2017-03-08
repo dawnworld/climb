@@ -19,6 +19,8 @@ extern "C" {
 #define MAX(A, B) 	((A) > (B) ? (A) : (B))
 #define MIN(A, B) 	((A) < (B) ? (A) : (B))
 
+#define MAXINT  0xffffffff
+
 typedef unsigned int    uint32;
 typedef unsigned short  uint16;
 typedef unsigned char   uint8;

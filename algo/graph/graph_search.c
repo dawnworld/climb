@@ -51,6 +51,26 @@ search_info_create(Graph g)
     return s;
 }
 
+void
+search_info_reset(struct search_info *s)
+{
+    uint32 i = 0;
+    uint32 n = 0;
+
+    if(NULL == s || NULL == s->graph)
+        return;
+
+    s->reached = 0;
+    n = graph_vertex_count(s->graph);
+
+    for(i = 0; i < n; i++) {
+        s->preorder[i] = SEARCH_INFO_NULL;
+        s->time[i] = SEARCH_INFO_NULL;
+        s->parent[i] = SEARCH_INFO_NULL;
+        s->depth[i] = SEARCH_INFO_NULL;
+    }
+}
+
 /* FREE search_info data---does NOT FREE graph pointer */
 void
 search_info_destroy(struct search_info *s)

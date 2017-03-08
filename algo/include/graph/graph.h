@@ -24,7 +24,10 @@ void graph_destroy(Graph);
 
 /* add an edge to an existing graph */
 /* doing this more than once may have unpredictable results */
+//TODO split two interface
 void graph_add_edge(Graph, uint32 source, uint32 sink, bool_t direct);
+//TODO split two interface
+void graph_add_weighted_edge(Graph, int source, int sink, int weight);
 
 /* return the number of vertices/edges in the graph */
 uint32 graph_vertex_count(Graph);
@@ -41,6 +44,10 @@ uint32 graph_has_edge(Graph, uint32 source, uint32 sink);
 /* no particular order is guaranteed */
 void graph_foreach(Graph g, uint32 source,
         void (*f)(Graph g, uint32 source, uint32 sink, void *data),
+        void *data);
+/* like above but also supplies weight */
+void graph_foreach_weighted(Graph g, int source,
+        void (*f)(Graph g, int source, int sink, int weight, void *data),
         void *data);
 
 void graph_set_vertex_data(Graph g, uint32 v, void *data);

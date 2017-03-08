@@ -8,6 +8,9 @@
 #include "gtest/gtest.h"
 #include "graph/graph.h"
 #include "graph/graph_search.h"
+#include "graph/shortest_path.h"
+
+#define TEST_SIZE (37)
 
 TEST(GraphBasic, Create) {
     Graph g = graph_create(10);
@@ -50,7 +53,7 @@ TEST(GraphBasic, AddEdge) {
     graph_destroy(g);
 }
 
-TEST(GraphSearch, dfs) {
+TEST(GraphSearch, DirectDfs) {
     Graph g = graph_create(10);
     ASSERT_TRUE(NULL != g);
     EXPECT_EQ(10, graph_vertex_count(g));
@@ -66,9 +69,65 @@ TEST(GraphSearch, dfs) {
     ASSERT_TRUE(NULL != info);
 
     dfs(info, 2);
-    EXPECT_EQ(1, info->reached);
+    EXPECT_EQ(2, info->reached);
+
+    search_info_reset(info);
+    dfs(info, 0);
+    EXPECT_EQ(5, info->reached);
 
     search_info_destroy(info);
+    graph_destroy(g);
+}
+
+TEST(GraphSearch, DirectBfs) {
+    Graph g = graph_create(10);
+    ASSERT_TRUE(NULL != g);
+    EXPECT_EQ(10, graph_vertex_count(g));
+
+    graph_add_edge(g, 0, 1, TRUE);
+    graph_add_edge(g, 0, 2, TRUE);
+    graph_add_edge(g, 0, 4, TRUE);
+    graph_add_edge(g, 2, 3, TRUE);
+    graph_add_edge(g, 4, 3, TRUE);
+    EXPECT_EQ(5, graph_edge_count(g));
+
+    search_info * info = search_info_create(g);
+    ASSERT_TRUE(NULL != info);
+
+    bfs(info, 2);
+    EXPECT_EQ(2, info->reached);
+
+    search_info_reset(info);
+    bfs(info, 0);
+    EXPECT_EQ(5, info->reached);
+
+    search_info_destroy(info);
+    graph_destroy(g);
+}
+
+TEST(ShortestPath, BellmanFord) {
+    int i;
+    int dist[TEST_SIZE];
+    int parent[TEST_SIZE];
+    int ret;
+
+    Graph g = graph_create(TEST_SIZE);
+    ASSERT_TRUE(NULL != g);
+    EXPECT_EQ(TEST_SIZE, graph_vertex_count(g));
+
+    for(i = 0; i < TEST_SIZE - 2; i++) {
+        graph_add_weighted_edge(g, i, i+1, -(2*i+1));
+    }
+    /* search from 0 */
+    ret = bellman_ford(g, 0, dist, parent);
+    EXPECT_EQ(0, ret);
+
+    /* check distances */
+    for(i = 0; i < TEST_SIZE - 2; i++) {
+        EXPECT_EQ(dist[i], -i*i);
+        ASSERT_TRUE(i == 0 || parent[i] == i-1);
+    }
+
     graph_destroy(g);
 }
 

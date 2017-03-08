@@ -28,7 +28,7 @@ typedef struct vertex_t {
     uint32              adjs_num;
     struct adj {
         struct vertex_t*    v; /* vertex */
-        uint32              w; /* weight */
+        int                 w; /* weight */
     } * adjs[1];
 } Vertex;
 
@@ -133,12 +133,42 @@ _graph_add_edge(Graph g, uint32 u, uint32 v)
     g->m++;
 }
 
+static void
+_graph_set_edge_weight(Graph g, uint32 u, uint32 v, int w)
+{
+    struct vertex_t *src = NULL, *sink = NULL;
+    uint32 i = 0;
+
+    src = g->vertices[u];
+    for(i = 0; i < src->adjs_num; i++)
+    {
+        sink = src->adjs[i]->v;
+        if(sink->id != v)
+            continue;
+        src->adjs[i]->w = w;
+    }
+
+}
+
 void
 graph_add_edge(Graph g, uint32 u, uint32 v, bool_t directed)
 {
     _graph_add_edge(g, u, v);
     if(FALSE == directed)
         _graph_add_edge(g, v, u);
+}
+
+/* add an edge to an existing graph */
+void
+graph_add_weighted_edge(Graph g, int u, int v, int wt)
+{
+    assert(u >= 0);
+    assert(u < g->n);
+    assert(v >= 0);
+    assert(v < g->n);
+
+    _graph_add_edge(g, u, v);
+    _graph_set_edge_weight(g, u, v, wt);
 }
 
 /* return the number of vertices in the graph */
@@ -225,10 +255,31 @@ graph_foreach(Graph g, uint32 source,
 
     assert(source < g->n);
     
-    v = g->vertices[i];
+    v = g->vertices[source];
 
     for(i = 0; i < v->adjs_num; i++) {
         f(g, source, v->adjs[i]->v->id, data);
+    }
+}
+
+/* invoke f on all edges (u,v) with source u */
+/* supplying data as final parameter to f */
+void
+graph_foreach_weighted(Graph g, int source,
+    void (*f)(Graph g, int source, int sink, int weight, void *data),
+    void *data)
+{
+    uint32 i = 0;
+    struct vertex_t *v;
+
+    assert(source >= 0);
+    assert(source < g->n);
+
+    v = g->vertices[source];
+
+    for(i = 0; i < v->adjs_num; i++) {
+        f(g, source, v->adjs[i]->v->id,
+                     v->adjs[i]->w, data);
     }
 }
 
