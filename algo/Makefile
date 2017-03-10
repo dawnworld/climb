@@ -13,6 +13,7 @@ GTEST_LIB = $(OUT)/googletest/libgtest.a
 
 CFLAGS = -g -I./include
 CFLAGS += -I$(GTEST_DIR)/include
+LD_FLAGS := -lpthread
 
 BUILDDIR = $(OUT)/obj
 
@@ -49,7 +50,7 @@ $(BUILDDIR)/%.o: %.c
 gdsl: $(GDSL_OBJS)
 
 test: $(OBJS) $(GDSL_OBJS) $(TEST_SRC)
-	$(CPP) $(CFLAGS) $^ $(GTEST_LIB) -o $(BIN)
+	$(CPP) $(CFLAGS) $^ $(GTEST_LIB) -o $(BIN) $(LD_FLAGS)
 	$(shell ln -s $(BIN) $(OUT_BIN))
 
 all:test

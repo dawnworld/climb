@@ -131,6 +131,37 @@ TEST(ShortestPath, BellmanFord) {
     graph_destroy(g);
 }
 
+TEST(ShortestPath, Dijkstra) {
+    int i;
+    int dist[TEST_SIZE];
+    int parent[TEST_SIZE];
+    int ret;
+
+    Graph g = graph_create(TEST_SIZE);
+    ASSERT_TRUE(NULL != g);
+    EXPECT_EQ(TEST_SIZE, graph_vertex_count(g));
+
+    for(i = 0; i < TEST_SIZE - 2; i++) {
+        graph_add_weighted_edge(g, i, i+1, -(2*i+1));
+    }
+
+    char buf[256] = {0};
+    graph_dump_vertex(g, 0, buf, sizeof(buf));
+    EXPECT_STREQ("(0->1) ", buf);
+    graph_dump_vertex(g, 34, buf, sizeof(buf));
+    EXPECT_STREQ("(34->35) ", buf);
+    /* search from 0 */
+    dijkstra(g, 0, dist, parent);
+
+    /* check distances */
+    for(i = 0; i < TEST_SIZE - 2; i++) {
+        EXPECT_EQ(dist[i], -i*i);
+        ASSERT_TRUE(i == 0 || parent[i] == i-1);
+    }
+
+    graph_destroy(g);
+}
+
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

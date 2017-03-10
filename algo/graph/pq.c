@@ -9,7 +9,7 @@
 #include <string.h>
 #include <assert.h>
 
-#include "graph/ph.h"
+#include "graph/pq.h"
 
 struct pq {
     int element_length;
